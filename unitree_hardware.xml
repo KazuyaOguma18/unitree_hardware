@@ -1,0 +1,9 @@
+<library path="unitree_hardware">
+  <class name="unitree_hardware/UnitreeHardware"
+         type="unitree_hardware::UnitreeHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The Unitree Motors (A1, B1, GO-M8010-6) system interface.
+    </description>
+  </class>
+</library>
