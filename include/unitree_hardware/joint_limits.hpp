@@ -22,10 +22,17 @@ public:
   bool load(const std::string & urdf_xml);
   bool configure(const std::vector<JointHandle> & joint_handles);
   void update();
+
+  double get_min_position() const;
+  double get_max_position() const;
+  double get_max_velocity() const;
+  double get_max_effort() const;
+
+private:
   JointHandle get_by_interface(
     const std::vector<JointHandle> & handles, const std::string & interface_name);
   bool are_names_identical(const std::vector<JointHandle> & handles);
-private:
+
   urdf::ModelSharedPtr model_;
   joint_limits::JointLimits joint_limits_;
   JointHandle joint_position_ = {"", "", nullptr};

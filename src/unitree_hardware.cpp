@@ -112,8 +112,8 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
 
     if (!transmissions_[i])
     {
-        RCLCPP_ERROR_STREAM(rclcpp::get_logger(HW_NAME), "Could find transmission for joint '" << info_.joints[i].name << "'");
-        return CallbackReturn::ERROR;
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger(HW_NAME), "Could find transmission for joint '" << info_.joints[i].name << "'");
+      return CallbackReturn::ERROR;
     }
   }
 
@@ -136,7 +136,7 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
   for (size_t i = 0; i < info_.joints.size(); i++) {
     // Initialize Actuator
     auto ator = UnitreeActuator();
-    if (!ator.init(serial_port, info_.joints[i])) {
+    if (!ator.init(serial_port, info_.joints[i]) && !ator.set_torque_limit(joint_limits_[i]->get_max_effort())) {
       RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to initialize actuator");
       return CallbackReturn::ERROR;
     }

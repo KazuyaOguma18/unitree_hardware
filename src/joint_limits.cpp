@@ -83,6 +83,26 @@ void JointLimits::update()
   }
 }
 
+double JointLimits::get_min_position() const 
+{
+  return joint_limits_.min_position;
+}
+
+double JointLimits::get_max_position() const 
+{
+  return joint_limits_.max_position;
+}
+
+double JointLimits::get_max_velocity() const
+{
+  return joint_limits_.max_velocity;
+}
+
+double JointLimits::get_max_effort() const
+{
+  return joint_limits_.max_effort;
+}
+
 JointHandle JointLimits::get_by_interface(const std::vector<JointHandle> & handles, const std::string & interface_name)
 {
   const auto result = std::find_if(

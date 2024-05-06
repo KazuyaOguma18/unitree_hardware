@@ -9,6 +9,7 @@ bool UnitreeActuator::init(const std::shared_ptr<SerialPort> & serial_port, cons
   serial_port_ = serial_port;
 
   // Actuator Parameter
+  // TODO : use default value & avoid segmentation fault
   id_ = std::stoi(info.parameters.at("id"));
   pos_gain_ = std::stod(info.parameters.at("pos_gain"));
   vel_gain_ = std::stod(info.parameters.at("vel_gain"));
@@ -159,6 +160,11 @@ std::string UnitreeActuator::get_log()
     break;
   }
   return "";
+}
+
+bool UnitreeActuator::set_torque_limit(const double & torque_limit) {
+  torque_limit_ = torque_limit;
+  return true;
 }
 
 void UnitreeActuator::clear_cmd()
