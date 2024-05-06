@@ -5,7 +5,8 @@
 namespace joint_limits_interface {
 bool JointLimits::load(const std::string & urdf_xml)
 {
-  model_ = std::shared_ptr<urdf::Model>();
+  model_ = std::make_shared<urdf::Model>();
+  // RCLCPP_INFO_STREAM(rclcpp::get_logger("JointLimits"), "robot_description: " << urdf_xml);
   if (!model_->initString(urdf_xml)) {
     RCLCPP_ERROR(rclcpp::get_logger("JointLimits"), "Failed to parse URDF");
     return false;
@@ -41,12 +42,20 @@ bool JointLimits::configure(const std::vector<JointHandle> & joint_handles)
   }
   joint_limits_.min_position = joint->limits->lower;
   joint_limits_.max_position = joint->limits->upper;
-  joint_limits_.max_velocity = joint->limits->velocity;
-  joint_limits_.max_effort   = joint->limits->effort;
+  if (!(joint_limits_.min_position == 0. && joint_limits_.max_position == 0.)) {
+    joint_limits_.has_position_limits = true;
+  }
 
-  joint_limits_.has_position_limits = true;
-  joint_limits_.has_velocity_limits = true;
-  joint_limits_.has_effort_limits = true;
+  joint_limits_.max_velocity = joint->limits->velocity;
+  if (!(joint_limits_.max_velocity == 0.)) {
+    joint_limits_.has_velocity_limits = true;
+  }
+
+  joint_limits_.max_effort   = joint->limits->effort;
+  if (!(joint_limits_.max_effort == 0.)) {
+    joint_limits_.has_effort_limits = true;
+  }
+  
   return true;
 }
 
@@ -86,7 +95,7 @@ JointHandle JointLimits::get_by_interface(const std::vector<JointHandle> & handl
   return *result;  
 }
 
-bool are_names_identical(const std::vector<JointHandle> & handles)
+bool JointLimits::are_names_identical(const std::vector<JointHandle> & handles)
 {
   std::vector<std::string> names;
   std::transform(

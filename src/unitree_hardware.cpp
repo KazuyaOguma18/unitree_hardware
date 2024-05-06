@@ -24,12 +24,6 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
   transmissions_.resize(info_.joints.size());
   joint_limits_.resize(info_.joints.size());
 
-  if (info_.hardware_parameters.find("serial_interface") != info_.hardware_parameters.end()) {
-    RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to find parameter 'serial_interface'");
-    return CallbackReturn::ERROR;
-  }
-  auto serial_port = std::make_shared<SerialPort>(info_.hardware_parameters.at("serial_interface"));
-
   for (uint i = 0; i < info_.joints.size(); i++) {
     joints_[i].state.position = std::numeric_limits<double>::quiet_NaN();
     joints_[i].state.velocity = std::numeric_limits<double>::quiet_NaN();
@@ -42,28 +36,10 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
     joints_[i].prev_command.effort = joints_[i].ator_command.effort;
   }
 
-  // Use dummy ?
-  if (
-    info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
-    info_.hardware_parameters.at("use_dummy") == "true")
-  {
-    use_dummy_ = true;
-    RCLCPP_INFO(rclcpp::get_logger(HW_NAME), "dummy mode");
-    return CallbackReturn::SUCCESS;
-  }  
-
   auto transmission_loader = transmission_interface::SimpleTransmissionLoader();
-  
-  for (uint i = 0; i < info_.joints.size(); i++) {
-    // Initialize Actuator
-    auto ator = UnitreeActuator();
-    if (!ator.init(serial_port, info_.joints[i])) {
-      RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to initialize actuator");
-      return CallbackReturn::ERROR;
-    }
-    ators_[i] = ator;
-    RCLCPP_INFO(rclcpp::get_logger(HW_NAME), "joint_id %d: %d", i, ators_[i].get_id());
 
+  // Initialize Transmission & JointLimits
+  for (size_t i = 0; i < info_.joints.size(); i++) {
     // Initialize JointLimits
     {
       joint_limits_[i] = std::make_shared<joint_limits_interface::JointLimits>();
@@ -139,6 +115,33 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
         RCLCPP_ERROR_STREAM(rclcpp::get_logger(HW_NAME), "Could find transmission for joint '" << info_.joints[i].name << "'");
         return CallbackReturn::ERROR;
     }
+  }
+
+  // Use dummy ?
+  if (
+    info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
+    info_.hardware_parameters.at("use_dummy") == "true")
+  {
+    use_dummy_ = true;
+    RCLCPP_INFO(rclcpp::get_logger(HW_NAME), "dummy mode");
+    return CallbackReturn::SUCCESS;
+  }  
+
+  if (info_.hardware_parameters.find("serial_interface") != info_.hardware_parameters.end()) {
+    RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to find parameter 'serial_interface'");
+    return CallbackReturn::ERROR;
+  }
+  auto serial_port = std::make_shared<SerialPort>(info_.hardware_parameters.at("serial_interface"));
+  
+  for (size_t i = 0; i < info_.joints.size(); i++) {
+    // Initialize Actuator
+    auto ator = UnitreeActuator();
+    if (!ator.init(serial_port, info_.joints[i])) {
+      RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to initialize actuator");
+      return CallbackReturn::ERROR;
+    }
+    ators_[i] = ator;
+    RCLCPP_INFO(rclcpp::get_logger(HW_NAME), "joint_id %ld: %d", i, ators_[i].get_id());
   }
 
   return CallbackReturn::SUCCESS;
@@ -232,6 +235,7 @@ return_type UnitreeHardware::read(const rclcpp::Time & time [[maybe_unused]], co
 
 return_type UnitreeHardware::write(const rclcpp::Time & time [[maybe_unused]], const rclcpp::Duration & period [[maybe_unused]])
 {
+
   // JointLimits
   for (auto joint_limit : joint_limits_) {
     joint_limit->update();
@@ -306,7 +310,7 @@ return_type UnitreeHardware::set_motor_mode(const MotorMode & mode)
 
 return_type UnitreeHardware::reset_command()
 {
-  for (uint i = 0; i < joints_.size(); i++) {
+  for (size_t i = 0; i < joints_.size(); i++) {
     joints_[i].joint_command.position = joints_[i].state.position;
     joints_[i].joint_command.velocity = 0.0;
     joints_[i].joint_command.effort = 0.0;
