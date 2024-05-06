@@ -1,0 +1,163 @@
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- macros to make primitive links & joints -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- macro to make a cylinder link -->
+    <xacro:macro name="make_cylinder_link"
+                 params="name 
+                         xyz:=^|'0 0 0'
+                         rpy:=^|'0 0 0'
+                         mass:=^
+                         radius:=^
+                         length:=^
+                         color:=^">
+        <link name="${name}">
+            <inertial>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <mass value="${mass}" />
+                <inertia ixx="${mass * (3 * radius * radius + length * length) / 12}" ixy="0" ixz="0"
+                         iyy="${mass * (3 * radius * radius + length * length) / 12}" iyz="0"
+                         izz="${mass * radius * radius / 2}" />
+            </inertial>
+            <visual>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <geometry>
+                    <cylinder radius="${radius}" length="${length}" />
+                </geometry>
+                <material name="${color}"/>
+            </visual>
+            <collision>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <geometry>
+                    <cylinder radius="${radius}" length="${length}" />
+                </geometry>
+                </collision>
+        </link>
+
+    </xacro:macro>
+
+    <!-- macro to make a sphere link -->
+    <xacro:macro name="make_sphere_link"
+                 params="name 
+                         xyz:=^|'0 0 0'
+                         rpy:=^|'0 0 0'
+                         mass:=^
+                         radius:=^
+                         color:=^">
+        <link name="${name}">
+            <inertial>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <mass value="${mass}" />
+                <inertia ixx="${2 * mass * radius * radius / 5}" ixy="0" ixz="0"
+                         iyy="${2 * mass * radius * radius / 5}" iyz="0"
+                         izz="${2 * mass * radius * radius / 5}" />
+            </inertial>
+            <visual>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <geometry>
+                    <sphere radius="${radius}" />
+                </geometry>
+                <material name="${color}"/>
+            </visual>
+            <collision>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <geometry>
+                    <sphere radius="${radius}" />
+                </geometry>
+            </collision>
+        </link>
+
+    </xacro:macro>
+
+    <!-- macro to make a box link -->
+    <xacro:macro name="make_box_link"
+                 params="name 
+                         xyz:=^|'0 0 0'
+                         rpy:=^|'0 0 0'
+                         mass:=^
+                         width:=^
+                         length:=^
+                         height:=^
+                         color:=^">
+        <link name="${name}">
+            <inertial>
+                <origin xyz="${xyz}" rpy="${rpy}"/>
+                <mass value="${mass}"/>
+                <inertia ixx="${mass * (length * length + height * height) / 12}" ixy="0" ixz="0" 
+                         iyy="${mass * (width * width + height * height) / 12}"   iyz="0" 
+                         izz="${mass * (width * width + length * length) / 12}" />
+            </inertial>
+            <visual>
+                <origin xyz="${xyz}" rpy="${rpy}"/>
+                <geometry>
+                    <box size="${width} ${length} ${height}"/>
+                </geometry>
+                <material name="${color}"/>
+            </visual>
+            <collision>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <geometry>
+                    <box size="${width} ${length} ${height}"/>
+                </geometry>
+            </collision>
+        </link>
+
+    </xacro:macro>
+
+    <!-- macro to make a cube link -->
+    <xacro:macro name="make_cube_link"
+                 params="name 
+                         xyz:=^|'0 0 0'
+                         rpy:=^|'0 0 0'
+                         mass:=^
+                         length:=^
+                         color:=^">
+        <xacro:make_box_link name="${name}"
+                             width="${length}"
+                             height="${length}" />
+    </xacro:macro>
+
+    <!-- macro to make a continuous joint -->
+    <xacro:macro name="make_continuous_joint"
+                 params="name 
+                         xyz:=^|'0 0 0'
+                         rpy:=^|'0 0 0'
+                         parent:=^
+                         child:=^
+                         axis:=^
+                         effort:=^|0
+                         velocity:=^|0
+                         damping:=^|0
+                         friction:=^|0
+                         spring:=^|0">
+        <joint name="${name}" type="continuous">
+            <origin xyz="${xyz}" rpy="${rpy}" />
+            <parent link="${parent}" />
+            <child link="${child}" />
+            <axis xyz="${axis}" />
+            <limit effort="0.0" velocity="0.0"/>
+            <dynamics damping="${damping}" friction="${friction}" />
+        </joint>
+        <gazebo reference="${name}">
+            <implicitSpringDamper>true</implicitSpringDamper>
+            <springStiffness>${spring}</springStiffness>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- macro to make a fixed joint -->
+    <xacro:macro name="make_fixed_joint"
+                 params="name 
+                         xyz:=^|'0 0 0'
+                         rpy:=^|'0 0 0'
+                         parent:=^
+                         child:=^">
+        <joint name="${name}" type="fixed">
+            <origin xyz="${xyz}" rpy="${rpy}" />
+            <parent link="${parent}" />
+            <child link="${child}" />
+        </joint>
+    </xacro:macro>
+
+</robot>

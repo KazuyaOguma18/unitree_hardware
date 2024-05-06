@@ -42,6 +42,24 @@ ament_target_dependencies(
   pluginlib
 )
 
+pluginlib_export_plugin_description_file(hardware_interface unitree_hardware.xml)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  DESTINATION lib
+)
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(DIRECTORY
+  urdf
+  controllers
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -53,5 +71,17 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  ${PROJECT_NAME}
+)
+ament_export_dependencies(
+  rclcpp
+  hardware_interface
+  pluginlib
+)
 
 ament_package()
