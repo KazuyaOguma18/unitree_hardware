@@ -22,6 +22,7 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
   joints_.resize(info_.joints.size(), Joint());
   ators_.resize(info_.joints.size());
   transmissions_.resize(info_.joints.size());
+  joint_limits_.resize(info_.joints.size());
 
   if (info_.hardware_parameters.find("serial_interface") != info_.hardware_parameters.end()) {
     RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to find parameter 'serial_interface'");
@@ -64,6 +65,19 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
     RCLCPP_INFO(rclcpp::get_logger(HW_NAME), "joint_id %d: %d", i, ators_[i].get_id());
 
     // Initialize JointLimits
+    {
+      joint_limits_[i] = std::make_shared<joint_limits_interface::JointLimits>();
+      if (!joint_limits_[i]->load(info_.original_xml)) {
+        return CallbackReturn::ERROR;
+      }
+    
+      joint_limits_interface::JointHandle joint_handle_position(info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].joint_command.position);
+      joint_limits_interface::JointHandle joint_handle_velocity(info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].joint_command.velocity);
+      joint_limits_interface::JointHandle joint_handle_effort(info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &joints_[i].joint_command.effort);
+      if (!joint_limits_[i]->configure({joint_handle_position, joint_handle_velocity, joint_handle_effort})) {
+        return CallbackReturn::ERROR;
+      }
+    }
 
     // Initialize Transmission
     for (auto transmission_info : info_.transmissions) {
@@ -219,6 +233,9 @@ return_type UnitreeHardware::read(const rclcpp::Time & time [[maybe_unused]], co
 return_type UnitreeHardware::write(const rclcpp::Time & time [[maybe_unused]], const rclcpp::Duration & period [[maybe_unused]])
 {
   // JointLimits
+  for (auto joint_limit : joint_limits_) {
+    joint_limit->update();
+  }
 
   // Transmission
   for (auto transmission : transmissions_) {

@@ -11,6 +11,8 @@ add_subdirectory(unitree_actuator_sdk)
 find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(transmission_interface REQUIRED)
+find_package(joint_limits REQUIRED)
+find_package(urdf REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -18,6 +20,7 @@ find_package(rclcpp REQUIRED)
 add_library(
   ${PROJECT_NAME}
   SHARED
+  src/joint_limits.cpp
   src/unitree_actuator.cpp
   src/unitree_hardware.cpp
 )
@@ -34,6 +37,8 @@ ament_target_dependencies(
   lifecycle_msgs
   hardware_interface
   transmission_interface
+  joint_limits
+  urdf
   pluginlib
 )
 

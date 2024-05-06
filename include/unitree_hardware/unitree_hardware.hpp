@@ -18,6 +18,7 @@ Licensed under the MIT license. See LICENSE file in the project root for details
 #include "transmission_interface/transmission.hpp"
 #include "transmission_interface/transmission_interface_exception.hpp"
 
+#include "joint_limits.hpp"
 #include <rclcpp/macros.hpp>
 
 using hardware_interface::CallbackReturn;
@@ -85,6 +86,8 @@ private:
   std::vector<Joint> joints_;
   std::vector<UnitreeActuator> ators_;
   std::vector<transmission_interface::TransmissionSharedPtr> transmissions_;
+  std::vector<joint_limits_interface::JointLimits::SharedPtr> joint_limits_;
+
   bool use_dummy_{false};
   ControlMode last_control_mode_{ControlMode::First};
 };
