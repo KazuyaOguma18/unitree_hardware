@@ -51,31 +51,31 @@ data: [2.0]"
 # Parameters
 These parameters are described in urdf/*.ros2_control.urdf.xacro
 ```
-    <ros2_control name="hoge" type="system">
-      <hardware>
-        <plugin>unitree_hardware/UnitreeHardware</plugin>
-        <param name="serial_interface">/dev/ttyUSB0</param>  # USB port name 
-        <param name="use_dummy">false</param>                # If true, it is in dummy mode and motors are not controlled
-      </hardware>
-      <joint name="pan_joint">
-        <param name="id">0</param>
-        <param name="motor_type">GO-M8010-6</param>          # GO-M8010-6, A1, B1
-        <param name="pos_gain">0.1</param>                   # position gain, Make it too big and it becomes unstable.
-        <param name="vel_gain">0.01</param>                  # velocity gain, Make it too big and it becomes unstable.
-        <param name="temperature_limit">80.</param>          # temperature limit, when the motor' temperature is exceeded it, the motor stops.
-        <command_interface name="position"/>
-        <command_interface name="velocity"/>
-        <command_interface name="effort"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-      <transmission name="pan_joint_transmission">
-        <plugin>transmission_interface/SimpleTransmission</plugin>
-        <actuator name="pan_motor" role="pan_motor"/>
-        <joint name="pan_joint" role="pan_joint">
-            <mechanical_reduction>1</mechanical_reduction>
-        </joint>
-      </transmission>
-    </ros2_control>
+<ros2_control name="hoge" type="system">
+  <hardware>
+    <plugin>unitree_hardware/UnitreeHardware</plugin>
+    <param name="serial_interface">/dev/ttyUSB0</param>  # USB port name 
+    <param name="use_dummy">false</param>                # If true, it is in dummy mode and motors are not controlled
+  </hardware>
+  <joint name="pan_joint">
+    <param name="id">0</param>
+    <param name="motor_type">GO-M8010-6</param>          # GO-M8010-6, A1, B1
+    <param name="pos_gain">0.1</param>                   # position gain, Make it too big and it becomes unstable.
+    <param name="vel_gain">0.01</param>                  # velocity gain, Make it too big and it becomes unstable.
+    <param name="temperature_limit">80.</param>          # temperature limit, when the motor' temperature is exceeded it, the motor stops.
+    <command_interface name="position"/>
+    <command_interface name="velocity"/>
+    <command_interface name="effort"/>
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+    <state_interface name="effort"/>
+  </joint>
+  <transmission name="pan_joint_transmission">
+    <plugin>transmission_interface/SimpleTransmission</plugin>
+    <actuator name="pan_motor" role="pan_motor"/>
+    <joint name="pan_joint" role="pan_joint">
+        <mechanical_reduction>1</mechanical_reduction>
+    </joint>
+  </transmission>
+</ros2_control>
 ```
