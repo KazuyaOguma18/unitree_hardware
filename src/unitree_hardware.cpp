@@ -127,16 +127,16 @@ CallbackReturn UnitreeHardware::on_init(const hardware_interface::HardwareInfo &
     return CallbackReturn::SUCCESS;
   }  
 
-  if (info_.hardware_parameters.find("serial_interface") != info_.hardware_parameters.end()) {
+  if (info_.hardware_parameters.find("serial_interface") == info_.hardware_parameters.end()) {
     RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to find parameter 'serial_interface'");
     return CallbackReturn::ERROR;
   }
   auto serial_port = std::make_shared<SerialPort>(info_.hardware_parameters.at("serial_interface"));
-  
+
   for (size_t i = 0; i < info_.joints.size(); i++) {
     // Initialize Actuator
     auto ator = UnitreeActuator();
-    if (!ator.init(serial_port, info_.joints[i]) && !ator.set_torque_limit(joint_limits_[i]->get_max_effort())) {
+    if (!ator.init(serial_port, info_.joints[i]) || !ator.set_torque_limit(joint_limits_[i]->get_max_effort())) {
       RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Failed to initialize actuator");
       return CallbackReturn::ERROR;
     }
@@ -235,7 +235,6 @@ return_type UnitreeHardware::read(const rclcpp::Time & time [[maybe_unused]], co
 
 return_type UnitreeHardware::write(const rclcpp::Time & time [[maybe_unused]], const rclcpp::Duration & period [[maybe_unused]])
 {
-
   // JointLimits
   for (auto joint_limit : joint_limits_) {
     joint_limit->update();
@@ -290,6 +289,9 @@ return_type UnitreeHardware::write(const rclcpp::Time & time [[maybe_unused]], c
       break;
     case ControlMode::Effort:
       return set_joint_efforts();
+      break;
+    case ControlMode::First:
+      return return_type::OK;
       break;
     default:
       RCLCPP_ERROR(rclcpp::get_logger(HW_NAME), "Invalid control method!");

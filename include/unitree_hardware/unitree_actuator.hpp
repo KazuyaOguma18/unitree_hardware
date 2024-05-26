@@ -40,10 +40,10 @@ private:
   // parameters
   MotorType motor_type_;
   int id_;
-  double pos_gain_;
-  double vel_gain_;
-  double torque_limit_;
-  double temperature_limit_;
+  double pos_gain_{0.};
+  double vel_gain_{0.};
+  double torque_limit_{0.};
+  double temperature_limit_{90.};
 };
 }  // namespace unitree_hardware
 #endif  // UNITREE_HARDWARE__UNITREE_ACTUATOR_HPP_

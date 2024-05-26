@@ -13,7 +13,6 @@ bool UnitreeActuator::init(const std::shared_ptr<SerialPort> & serial_port, cons
   id_ = std::stoi(info.parameters.at("id"));
   pos_gain_ = std::stod(info.parameters.at("pos_gain"));
   vel_gain_ = std::stod(info.parameters.at("vel_gain"));
-  torque_limit_ = std::stod(info.parameters.at("torque_limit"));
   temperature_limit_ = std::stod(info.parameters.at("temperature_limit"));
   std::string motor_type_str = info.parameters.at("motor_type");
 
@@ -27,6 +26,7 @@ bool UnitreeActuator::init(const std::shared_ptr<SerialPort> & serial_port, cons
   else if (motor_type_str == "GO-M8010-6") { motor_type_ = MotorType::GO_M8010_6; }
 
   // Motor Init & Check motor
+  motor_data_.motorType = motor_type_;
   motor_cmd_.motorType = motor_type_;
   motor_cmd_.mode = queryMotorMode(motor_type_, MotorMode::BRAKE);
   motor_cmd_.id = id_;
@@ -57,9 +57,11 @@ bool UnitreeActuator::set_position(const double & pos_cmd)
 
   double pos_gain = pos_gain_;
   // Torque Limit
-  const double approx_input_torque = abs(compute_approximately_input_torque(pos_cmd, 0., 0., pos_gain, 0.));
-  if (approx_input_torque > torque_limit_) {
-    pos_gain = torque_limit_ / approx_input_torque * pos_gain;
+  if (torque_limit_ != 0.) {
+    const double approx_input_torque = abs(compute_approximately_input_torque(pos_cmd, 0., 0., pos_gain, 0.));
+    if (approx_input_torque > torque_limit_) {
+      pos_gain = torque_limit_ / approx_input_torque * pos_gain;
+    }
   }
 
   // Temperature Limit
@@ -89,9 +91,11 @@ bool UnitreeActuator::set_velocity(const double & vel_cmd)
 
   double vel_gain = vel_gain_;
   // Torque Limit
-  const double approx_input_torque = abs(compute_approximately_input_torque(0., vel_cmd, 0., 0., vel_gain));
-  if (approx_input_torque > torque_limit_) {
-    vel_gain = torque_limit_ / approx_input_torque * vel_gain;
+  if (torque_limit_ != 0.) {
+    const double approx_input_torque = abs(compute_approximately_input_torque(0., vel_cmd, 0., 0., vel_gain));
+    if (approx_input_torque > torque_limit_) {
+      vel_gain = torque_limit_ / approx_input_torque * vel_gain;
+    }
   }
 
   // Temperature Limit
@@ -110,11 +114,14 @@ bool UnitreeActuator::set_effort(const double & eff_cmd)
   clear_cmd();
 
   // Torque Limit
-  const double approx_input_torque = abs(compute_approximately_input_torque(eff_cmd, 0., 0.));
+  if (torque_limit_ != 0.) {
+    const double approx_input_torque = abs(compute_approximately_input_torque(eff_cmd, 0., 0.));
 
-  if (approx_input_torque > torque_limit_) {
-    out_eff_cmd = torque_limit_ / approx_input_torque * eff_cmd;
+    if (approx_input_torque > torque_limit_) {
+      out_eff_cmd = torque_limit_ / approx_input_torque * eff_cmd;
+    }
   }
+
 
   // Temperature Limit
   if (motor_data_.temp > temperature_limit_) {
@@ -163,6 +170,10 @@ std::string UnitreeActuator::get_log()
 }
 
 bool UnitreeActuator::set_torque_limit(const double & torque_limit) {
+  if (torque_limit <= 0.) {
+    RCLCPP_ERROR(rclcpp::get_logger("UnitreeActuator"), "Invalid torque limit (0) detected! please set torque limit greater than 0");
+    return false;
+  } 
   torque_limit_ = torque_limit;
   return true;
 }
