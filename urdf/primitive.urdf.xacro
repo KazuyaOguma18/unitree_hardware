@@ -137,7 +137,7 @@
             <parent link="${parent}" />
             <child link="${child}" />
             <axis xyz="${axis}" />
-            <limit effort="0.0" velocity="0.0"/>
+            <limit effort="${effort}" velocity="${velocity}"/>
             <dynamics damping="${damping}" friction="${friction}" />
         </joint>
         <gazebo reference="${name}">

@@ -2,6 +2,9 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
 
+    velocity_controller:
+      type: forward_command_controller/ForwardCommandController
+
     position_controller:
       type: forward_command_controller/ForwardCommandController
 
@@ -13,3 +16,9 @@ position_controller:
     joints:
       - pan_joint
     interface_name: position
+
+velocity_controller:
+  ros__parameters:
+    joints:
+      - pan_joint
+    interface_name: velocity
