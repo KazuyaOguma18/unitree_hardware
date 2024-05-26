@@ -41,6 +41,18 @@ ament_target_dependencies(
   urdf
   pluginlib
 )
+set(UNITREE_ACTUATOR_SDK_LIB ${CMAKE_CURRENT_SOURCE_DIR}/unitree_actuator_sdk/lib)
+link_directories(${UNITREE_ACTUATOR_SDK_LIB})
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64") 
+    set(EXTRA_LIBS libUnitreeMotorSDK_Arm64.so)
+else()
+    set(EXTRA_LIBS libUnitreeMotorSDK_Linux64.so)
+endif()
+
+target_link_libraries(
+  ${PROJECT_NAME}
+  ${CMAKE_CURRENT_SOURCE_DIR}/unitree_actuator_sdk/lib/${EXTRA_LIBS}
+)
 
 pluginlib_export_plugin_description_file(hardware_interface unitree_hardware.xml)
 
